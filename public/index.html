@@ -8,8 +8,638 @@
   <meta name="theme-color" content="#FF6B8A">
   <title>💕 我们的距离</title>
   <!-- Leaflet 地图（开箱即用，无需 API Key） -->
-  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-  <link rel="stylesheet" href="style.css">
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --pink: #FF6B8A;
+  --pink-light: #FF8FA8;
+  --pink-dark: #E55A78;
+  --orange: #FF8E53;
+  --gradient-primary: linear-gradient(135deg, #FF6B8A 0%, #FF8E53 100%);
+  --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg: #FFF5F7;
+  --card-bg: #FFFFFF;
+  --text-primary: #2D2D3A;
+  --text-secondary: #7C7C8A;
+  --text-muted: #A0A0B0;
+  --shadow-sm: 0 2px 8px rgba(255, 107, 138, 0.12);
+  --shadow-md: 0 4px 20px rgba(255, 107, 138, 0.15);
+  --shadow-lg: 0 8px 32px rgba(255, 107, 138, 0.18);
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ===== 屏幕通用 ===== */
+.screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ===== 配对屏幕 ===== */
+#pairing-screen {
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, #FFF0F3 0%, #FFE4EC 30%, #FFD6E0 60%, #FFE8D6 100%);
+  padding: 20px;
+}
+
+.pairing-container {
+  width: 100%;
+  max-width: 400px;
+  animation: fadeUp 0.8s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pairing-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.pairing-icon {
+  font-size: 64px;
+  margin-bottom: 12px;
+  animation: heartbeat 1.5s ease infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.2); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.15); }
+  60% { transform: scale(1); }
+}
+
+.pairing-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+.pairing-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.pairing-form {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-lg);
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #F8F8FC;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--pink);
+  background: #FFF;
+  box-shadow: 0 0 0 4px rgba(255, 107, 138, 0.1);
+}
+
+.input-icon {
+  font-size: 18px;
+  margin-right: 10px;
+  opacity: 0.6;
+}
+
+.input-wrapper input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: var(--text-primary);
+  padding: 14px 0;
+  font-weight: 500;
+}
+
+.input-wrapper input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.input-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  text-align: center;
+}
+
+.emoji-picker {
+  margin-bottom: 20px;
+}
+
+.emoji-picker label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.emoji-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #F8F8FC;
+}
+
+.emoji-option:hover {
+  background: #FFE4EC;
+  transform: scale(1.1);
+}
+
+.emoji-option.active {
+  background: var(--gradient-primary);
+  box-shadow: 0 2px 12px rgba(255, 107, 138, 0.3);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-primary);
+  color: white;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 107, 138, 0.35);
+  letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(255, 107, 138, 0.45);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 18px;
+}
+
+/* ===== 主屏幕 ===== */
+#main-screen {
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* 状态栏 */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  z-index: 3;
+  flex-shrink: 0;
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFB800;
+  transition: all 0.3s ease;
+}
+
+.status-dot.connected {
+  background: #34D399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+}
+
+.status-dot.disconnected {
+  background: #F87171;
+}
+
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.btn-icon-small {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-small:hover {
+  background: #F8F8FC;
+  color: var(--text-primary);
+}
+
+/* 用户卡片 */
+.user-cards {
+  display: flex;
+  align-items: center;
+  padding: 12px 12px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.user-card {
+  flex: 1;
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: all 0.3s ease;
+  min-height: 90px;
+}
+
+.user-card.me {
+  border-left: 3px solid var(--pink);
+}
+
+.user-card.ta {
+  border-right: 3px solid #667eea;
+}
+
+.user-card.waiting {
+  opacity: 0.6;
+}
+
+.card-avatar {
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F8FC;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.card-location {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.card-weather {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.weather-loading {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.card-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.user-card.me .card-badge {
+  background: #FFE4EC;
+  color: var(--pink);
+}
+
+.user-card.ta .card-badge {
+  background: #EEE5FF;
+  color: #764ba2;
+}
+
+/* 距离爱心 */
+.distance-heart {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 6px;
+  position: relative;
+}
+
+.heart-icon {
+  font-size: 24px;
+  animation: heartbeat 2s ease infinite;
+}
+
+.distance-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--pink);
+  white-space: nowrap;
+}
+
+.distance-unit {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: -2px;
+}
+
+/* 地图 */
+.map-wrapper {
+  flex: 1;
+  padding: 0 8px 8px;
+  min-height: 0;
+  position: relative;
+}
+
+#map-container {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: #E8E8E8;
+  min-height: 250px;
+}
+
+.amap-logo {
+  display: none !important;
+}
+
+.amap-copyright {
+  display: none !important;
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--card-bg);
+  border-top: 1px solid rgba(0,0,0,0.04);
+  flex-shrink: 0;
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 138, 0.25);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 107, 138, 0.35);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+.last-update {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* 加载覆盖层 */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 245, 247, 0.95);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+#loading-overlay p {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #FFE4EC;
+  border-top-color: var(--pink);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+  .user-cards {
+    padding: 8px 6px;
+    gap: 4px;
+  }
+
+  .user-card {
+    padding: 10px;
+    min-height: 80px;
+  }
+
+  .card-avatar {
+    font-size: 26px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .card-name {
+    font-size: 13px;
+  }
+
+  .card-location {
+    font-size: 11px;
+  }
+
+  .distance-value {
+    font-size: 15px;
+  }
+
+  .heart-icon {
+    font-size: 20px;
+  }
+
+  .card-weather {
+    font-size: 12px;
+  }
+
+  .map-wrapper {
+    padding: 0 4px 4px;
+  }
+
+  .pairing-container {
+    max-width: 340px;
+  }
+
+  .pairing-header h1 {
+    font-size: 24px;
+  }
+
+  .pairing-form {
+    padding: 24px 18px;
+  }
+
+  .emoji-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .emoji-option {
+    font-size: 22px;
+    padding: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .emoji-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .distance-heart {
+    padding: 2px 4px;
+  }
+
+  .distance-value {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) {
+  .user-cards {
+    padding: 16px 20px;
+    gap: 16px;
+  }
+
+  .map-wrapper {
+    padding: 0 12px 12px;
+  }
+
+  .user-card {
+    padding: 18px;
+  }
+}
+
+</style>
 
   <script>
 document.addEventListener('click', function(e) {
@@ -168,8 +798,674 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
-<script src="app.js?v=1781425820348"></script>
-  <script async src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// 默认使用 Leaflet + OpenStreetMap，无需任何 Key，开箱即用
+const CONFIG = {
+  AMapKey: '', // 留空用 Leaflet，填 Key 后自动切换高德地图
+  wsUrl: (() => {
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${proto}//${location.host}`;
+  })(),
+  locationInterval: 10000, // 位置上报间隔（毫秒）
+};
+
+// ===== 状态 =====
+let ws = null;
+let map = null;
+let myMarker = null;
+let taMarker = null;
+let midMarker = null;
+let heartLine = null;
+let myLat = null;
+let myLng = null;
+let taLat = null;
+let taLng = null;
+let watchId = null;
+let myName = '';
+let myEmoji = '💙';
+let roomCode = '';
+let isConnected = false;
+let taConnected = false;
+let taName = 'TA';
+let taEmoji = '💜';
+let locationIntervalId = null;
+let useAMap = false;
+
+// ===== 配对页 =====
+function selectEmoji(el) {
+  document.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  myEmoji = el.dataset.emoji;
+}
+
+document.querySelectorAll('.emoji-option').forEach(el => {
+  el.addEventListener('click', () => selectEmoji(el));
+});
+
+document.getElementById('nickname-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') joinRoom();
+});
+document.getElementById('room-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') joinRoom();
+});
+
+function joinRoom() {
+  myName = document.getElementById('nickname-input').value.trim() || '我';
+  roomCode = document.getElementById('room-input').value.trim();
+
+  if (!roomCode) {
+    const input = document.getElementById('room-input');
+    input.parentElement.style.borderColor = '#F87171';
+    input.focus();
+    setTimeout(() => {
+      input.parentElement.style.borderColor = 'transparent';
+    }, 1500);
+    return;
+  }
+
+  document.getElementById('pairing-screen').style.display = 'none';
+  document.getElementById('main-screen').style.display = 'flex';
+  document.getElementById('my-name').textContent = myName;
+  document.getElementById('my-avatar').textContent = myEmoji;
+  document.getElementById('room-display').textContent = `🏠 ${roomCode}`;
+
+  initApp();
+}
+
+function disconnect() {
+  if (ws) { ws.close(); ws = null; }
+  if (watchId) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  if (locationIntervalId) { clearInterval(locationIntervalId); locationIntervalId = null; }
+  document.getElementById('main-screen').style.display = 'none';
+  document.getElementById('pairing-screen').style.display = 'flex';
+}
+
+// ===== 初始化 =====
+async function initApp() {
+  // 1. 初始化地图
+  await initMap();
+
+  // 2. 连接 WebSocket
+  connectWebSocket();
+
+  // 3. 开始获取位置
+  startLocationTracking();
+
+  // 4. 定期发送位置（兜底，防止 watchPosition 不够可靠）
+  locationIntervalId = setInterval(() => {
+    if (myLat !== null && myLng !== null && ws && ws.readyState === WebSocket.OPEN) {
+      sendLocation();
+    }
+  }, CONFIG.locationInterval);
+}
+
+// ===== WebSocket =====
+function connectWebSocket() {
+  try {
+    ws = new WebSocket(CONFIG.wsUrl);
+  } catch(e) {
+    console.log('WebSocket创建失败，切到HTTP');
+    startHttpPoll();
+    return;
+  }
+  
+  wsTimer = setTimeout(function() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.log('WebSocket连接超时，切到HTTP');
+      try { ws.close(); } catch(e) {}
+      ws = null;
+      startHttpPoll();
+    }
+  }, 5000);
+
+  ws.onopen = function() {
+    clearTimeout(wsTimer);
+    setStatus('connected', '已连接');
+    sendLocation();
+    ws.send(JSON.stringify({type:'join',room:roomCode,name:myName,emoji:myEmoji}));
+  };
+
+  ws.onmessage = function(ev) {
+    try { handleMessage(JSON.parse(ev.data)); } catch(e) { console.error('消息解析失败:', e); }
+  };
+
+  ws.onclose = function() {
+    if (!httpPollOn) {
+      setStatus('disconnected', '连接断开，切到HTTP');
+      startHttpPoll();
+    }
+  };
+
+  ws.onerror = function() {
+    clearTimeout(wsTimer);
+    if (!httpPollOn) {
+      console.log('WebSocket错误，切到HTTP');
+      startHttpPoll();
+    }
+  };
+}
+
+function handleMessage(msg)function handleMessage(msg) {
+  switch (msg.type) {
+    case 'room-info':
+      msg.peers.forEach(p => {
+        if (p.name !== myName) {
+          taName = p.name;
+          taEmoji = p.emoji || '💜';
+          taConnected = true;
+          if (p.lat !== null && p.lng !== null) {
+            taLat = p.lat;
+            taLng = p.lng;
+          }
+          updateTACard();
+          updateTAStatus();
+          updateMap();
+          updateDistance();
+          if (taLat !== null && taLng !== null) {
+            fetchWeather(taLat, taLng, 'ta');
+            reverseGeocode(taLat, taLng, 'ta');
+          }
+        }
+      });
+      break;
+
+    case 'peer-joined':
+      taName = msg.name;
+      taEmoji = msg.emoji || '💜';
+      taConnected = true;
+      updateTACard();
+      updateTAStatus();
+      updateStatusMsg('❤️ ' + taName + ' 已加入');
+      break;
+
+    case 'peer-location':
+      taLat = msg.lat;
+      taLng = msg.lng;
+      taName = msg.name;
+      taEmoji = msg.emoji || '💜';
+      taConnected = true;
+      updateTACard();
+      updateTAStatus();
+      updateMap();
+      updateDistance();
+      if (taLat !== null && taLng !== null) {
+        fetchWeather(taLat, taLng, 'ta');
+        reverseGeocode(taLat, taLng, 'ta');
+      }
+      break;
+
+    case 'peer-left':
+      taConnected = false;
+      taLat = null;
+      taLng = null;
+      updateTACard();
+      updateTAStatus();
+      updateMap();
+      updateDistance();
+      updateStatusMsg('💔 ' + msg.name + ' 已断开');
+      break;
+  }
+}
+
+function sendLocation() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      type: 'location',
+      room: roomCode,
+      lat: myLat,
+      lng: myLng,
+      name: myName,
+      emoji: myEmoji
+    }));
+  }
+}
+
+// ===== 地图（Leaflet + OpenStreetMap，开箱即用）=====
+// 如果想切换为高德地图，配置 CONFIG.AMapKey 后
+// 将下方 L.map 替换为高德地图初始化代码即可
+
+try { var L_check = typeof L !== 'undefined' && L; } catch(e){ L_check = null; }
+async function initMap() {
+  return new Promise((resolve) => {
+    const container = document.getElementById('map-container');
+
+    try {
+      if (typeof L === 'undefined') {
+        container.innerHTML = '<div style="padding:30px;text-align:center;color:#999;font-size:14px">地图加载中...</div>';
+        setTimeout(resolve, 1000);
+        return;
+      }
+
+      map = L.map(container, {
+        center: [35.0, 104.0],
+        zoom: 5,
+        zoomControl: false,
+        attributionControl: false,
+      });
+
+      // 使用 ArcGIS 地图（在中国可正常访问）
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Esri'
+      }).addTo(map);
+
+      // 备选：OpenStreetMap 中文风格
+      L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+      }).addTo(map);
+
+      setTimeout(function() {
+        try { map.invalidateSize(); } catch(e) {}
+        resolve();
+      }, 300);
+    } catch(e) {
+      console.error('地图初始化失败:', e);
+      container.innerHTML = '<div style="padding:30px;text-align:center;color:#999;font-size:14px">地图加载失败，其他功能正常</div>';
+      setTimeout(resolve, 500);
+    }
+  });
+}
+
+function updateMap() {
+  if (!map) return;
+
+  // 清除旧的标记和线条
+  if (myMarker) { map.removeLayer(myMarker); myMarker = null; }
+  if (taMarker) { map.removeLayer(taMarker); taMarker = null; }
+  if (midMarker) { map.removeLayer(midMarker); midMarker = null; }
+  if (heartLine) { map.removeLayer(heartLine); heartLine = null; }
+
+  const markers = [];
+  const positions = [];
+
+  // 我的位置标记
+  if (myLat !== null && myLng !== null) {
+    const myIcon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="
+        display:flex;align-items:center;justify-content:center;
+        width:44px;height:44px;border-radius:50%;
+        background:linear-gradient(135deg,#FF6B8A,#FF8E53);
+        box-shadow:0 3px 12px rgba(255,107,138,0.5);
+        font-size:20px;border:3px solid white;
+        transform:translate(-50%,-50%);
+      ">${myEmoji}</div>`,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+    });
+    myMarker = L.marker([myLat, myLng], { icon: myIcon, zIndexOffset: 100 }).addTo(map);
+    markers.push(myMarker);
+    positions.push([myLat, myLng]);
+  }
+
+  // TA 的位置标记
+  if (taLat !== null && taLng !== null) {
+    const taIcon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="
+        display:flex;align-items:center;justify-content:center;
+        width:44px;height:44px;border-radius:50%;
+        background:linear-gradient(135deg,#667eea,#764ba2);
+        box-shadow:0 3px 12px rgba(102,126,234,0.5);
+        font-size:20px;border:3px solid white;
+        transform:translate(-50%,-50%);
+      ">${taEmoji}</div>`,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+    });
+    taMarker = L.marker([taLat, taLng], { icon: taIcon, zIndexOffset: 100 }).addTo(map);
+    markers.push(taMarker);
+    positions.push([taLat, taLng]);
+  }
+
+  // 画连接线和爱心标
+  if (positions.length === 2) {
+    heartLine = L.polyline(positions, {
+      color: '#FF6B8A',
+      weight: 3,
+      opacity: 0.5,
+      dashArray: '10, 10',
+    }).addTo(map);
+
+    const midLat = (positions[0][0] + positions[1][0]) / 2;
+    const midLng = (positions[0][1] + positions[1][1]) / 2;
+
+    const midIcon = L.divIcon({
+      className: 'mid-heart',
+      html: `<div style="
+        font-size:30px;
+        text-shadow:0 2px 8px rgba(255,107,138,0.4);
+        transform:translate(-50%,-50%);
+      ">💕</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    });
+    midMarker = L.marker([midLat, midLng], { icon: midIcon, zIndexOffset: 200 }).addTo(map);
+    markers.push(midMarker);
+
+    // 自适应缩放
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds().pad(0.3));
+  } else if (positions.length === 1) {
+    map.setView(positions[0], 12);
+  }
+}
+
+// ===== 位置追踪 =====
+function startLocationTracking() {
+  if (!navigator.geolocation) {
+    updateMyLocation('❌ 设备不支持定位');
+    return;
+  }
+
+  const overlay = document.getElementById('loading-overlay');
+  overlay.style.display = 'flex';
+
+  // 先获取一次
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      overlay.style.display = 'none';
+      handlePosition(pos);
+    },
+    (err) => {
+      overlay.style.display = 'none';
+      console.error('定位失败:', err);
+      if (err.code === 1) {
+        updateMyLocation('⚠️ 请在浏览器中允许位置权限');
+      } else if (err.code === 2) {
+        updateMyLocation('⚠️ 位置不可用，请检查GPS');
+      } else {
+        updateMyLocation('⚠️ 定位超时，请重试');
+      }
+    },
+    { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
+  );
+
+  // 持续追踪
+  watchId = navigator.geolocation.watchPosition(
+    handlePosition,
+    (err) => console.error('位置追踪失败:', err),
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+  );
+}
+
+function handlePosition(pos) {
+  const newLat = pos.coords.latitude;
+  const newLng = pos.coords.longitude;
+
+  // 小幅变化跳过更新（减少闪烁）
+  if (myLat !== null && myLng !== null) {
+    const dLat = Math.abs(newLat - myLat);
+    const dLng = Math.abs(newLng - myLng);
+    if (dLat < 0.0005 && dLng < 0.0005) return;
+  }
+
+  myLat = newLat;
+  myLng = newLng;
+
+  updateMyCard();
+  updateMap();
+  updateDistance();
+  sendLocation();
+  document.getElementById('last-update').textContent = '刚刚更新';
+
+  fetchWeather(myLat, myLng, 'me');
+  reverseGeocode(myLat, myLng, 'me');
+}
+
+function forceUpdateLocation() {
+  const overlay = document.getElementById('loading-overlay');
+  overlay.style.display = 'flex';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      overlay.style.display = 'none';
+      handlePosition(pos);
+    },
+    () => { overlay.style.display = 'none'; },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
+}
+
+// ===== 天气（Open-Meteo API，免费，无需 Key）=====
+async function fetchWeather(lat, lng, who) {
+  const el = document.getElementById(who === 'me' ? 'my-weather' : 'ta-weather');
+  if (!el) return;
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('天气API响应异常');
+    const data = await resp.json();
+
+    if (data && data.current) {
+      const c = data.current;
+      const emoji = getWeatherEmoji(c.weather_code);
+      const desc = getWeatherDesc(c.weather_code);
+      el.innerHTML = `
+        <span style="font-size:18px;line-height:1">${emoji}</span>
+        <span style="font-weight:600;font-size:16px;margin-left:2px">${Math.round(c.temperature_2m)}°</span>
+        <span style="color:var(--text-secondary);font-size:11px;margin-left:4px">${desc}</span>
+        <span style="color:var(--text-muted);font-size:10px;margin-left:4px">💧${c.relative_humidity_2m}%</span>
+      `;
+    }
+  } catch (e) {
+    console.error('天气获取失败:', e);
+  }
+}
+
+function getWeatherEmoji(code) {
+  if (code === 0) return '☀️';
+  if (code <= 3) return '⛅';
+  if (code <= 20) return '☁️';
+  if (code <= 30) return '⛈️';
+  if (code <= 50) return '🌦️';
+  if (code <= 60) return '🌧️';
+  if (code <= 70) return '🌨️';
+  if (code <= 80) return '🌧️';
+  if (code <= 99) return '⛈️';
+  return '☁️';
+}
+
+function getWeatherDesc(code) {
+  const map = {
+    0: '晴', 1: '少云', 2: '多云', 3: '阴',
+    45: '雾', 48: '霜雾',
+    51: '小毛毛雨', 53: '毛毛雨', 55: '大毛毛雨',
+    56: '冻毛毛雨', 57: '冻毛毛雨',
+    61: '小雨', 63: '中雨', 65: '大雨',
+    66: '冻雨', 67: '冻雨',
+    71: '小雪', 73: '中雪', 75: '大雪',
+    77: '雪粒',
+    80: '阵雨', 81: '中阵雨', 82: '大阵雨',
+    85: '小阵雪', 86: '大阵雪',
+    95: '雷暴', 96: '雷暴+冰雹', 99: '强雷暴+冰雹',
+  };
+  return map[code] || '未知';
+}
+
+// ===== 逆地理编码（获取地址名称）=====
+async function reverseGeocode(lat, lng, who) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&accept-language=zh`;
+    const resp = await fetch(url, {
+      headers: { 'User-Agent': 'LoveMap/1.0' }
+    });
+    if (!resp.ok) throw new Error('地理编码失败: ' + resp.status);
+    const data = await resp.json();
+
+    let loc = '未知位置';
+    if (data && data.address) {
+      const a = data.address;
+      loc = a.city || a.town || a.county || a.district || a.state || a.country || '未知位置';
+    }
+
+    if (who === 'me') updateMyLocation(loc);
+    else updateTALocation(loc);
+  } catch (e) {
+    console.error('逆地理编码失败:', e);
+    const fallback = `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`;
+    if (who === 'me') updateMyLocation(fallback);
+    else updateTALocation(fallback);
+  }
+}
+
+// ===== 距离计算（Haversine）=====
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function updateDistance() {
+  const el = document.getElementById('distance-value');
+  if (!el) return;
+
+  if (myLat !== null && myLng !== null && taLat !== null && taLng !== null) {
+    const dist = calculateDistance(myLat, myLng, taLat, taLng);
+    const unitEl = document.querySelector('.distance-unit');
+    if (dist < 1) {
+      el.textContent = (dist * 1000).toFixed(0);
+      if (unitEl) unitEl.textContent = 'm';
+    } else if (dist < 100) {
+      el.textContent = dist.toFixed(1);
+      if (unitEl) unitEl.textContent = 'km';
+    } else {
+      el.textContent = dist.toFixed(0);
+      if (unitEl) unitEl.textContent = 'km';
+    }
+  } else {
+    el.textContent = '--';
+    const unitEl = document.querySelector('.distance-unit');
+    if (unitEl) unitEl.textContent = 'km';
+  }
+}
+
+// ===== UI 更新 =====
+function setStatus(state, text) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  if (dot) dot.className = 'status-dot ' + state;
+  if (txt) txt.textContent = text;
+  isConnected = state === 'connected';
+}
+
+function updateMyCard() {
+  const nameEl = document.getElementById('my-name');
+  const avatarEl = document.getElementById('my-avatar');
+  if (nameEl) nameEl.textContent = myName;
+  if (avatarEl) avatarEl.textContent = myEmoji;
+}
+
+function updateMyLocation(loc) {
+  const el = document.getElementById('my-location');
+  if (el) el.textContent = '📍 ' + loc;
+}
+
+function updateTACard() {
+  const nameEl = document.getElementById('ta-name');
+  const avatarEl = document.getElementById('ta-avatar');
+  if (nameEl) nameEl.textContent = taName;
+  if (avatarEl) avatarEl.textContent = taEmoji;
+  const card = document.querySelector('.user-card.ta');
+  if (card) {
+    if (taConnected) card.classList.remove('waiting');
+    else card.classList.add('waiting');
+  }
+}
+
+function updateTALocation(loc) {
+  const el = document.getElementById('ta-location');
+  if (el) el.textContent = '📍 ' + loc;
+}
+
+function updateTAStatus() {
+  const loc = document.getElementById('ta-location');
+  if (!loc) return;
+  if (taConnected && taLat !== null && taLng !== null) {
+    // 已由 reverseGeocode 更新
+  } else if (taConnected) {
+    loc.textContent = '⏳ 等待TA分享位置...';
+  } else {
+    loc.textContent = '💤 等待TA连接...';
+    const weather = document.getElementById('ta-weather');
+    if (weather) weather.innerHTML = '<span class="weather-loading">☁️ 等待中...</span>';
+  }
+}
+
+function updateStatusMsg(msg) {
+  const txt = document.getElementById('status-text');
+  if (!txt) return;
+  txt.textContent = msg;
+  setTimeout(() => {
+    if (isConnected && txt) txt.textContent = '已连接';
+  }, 3000);
+}
+
+
+// ===== HTTP 轮询（WebSocket 不可用时的备份）=====
+function startHttpPoll() {
+  if (httpPollOn) return;
+  httpPollOn = true;
+  setStatus('connected', '⚡ HTTP模式');
+  
+  httpSendLoc();
+  
+  httpPollTimer = setInterval(function() {
+    httpSendLoc();
+  }, 3000);
+}
+
+function httpSendLoc() {
+  if (!myName || !roomCode || myLat === null || myLng === null) return;
+  
+  var x = new XMLHttpRequest();
+  x.open('POST', '/api/location', true);
+  x.setRequestHeader('Content-Type', 'application/json');
+  x.onreadystatechange = function() {
+    if (x.readyState === 4 && x.status === 200) {
+      try {
+        var d = JSON.parse(x.responseText);
+        if (d.ok && d.peers && d.peers.length > 0) {
+          d.peers.forEach(function(p) {
+            taName = p.name;
+            taEmoji = p.emoji || '💜';
+            if (p.lat !== null) {
+              taLat = p.lat;
+              taLng = p.lng;
+              taConnected = true;
+              updateTACard();
+              updateTAStatus();
+              updateMap();
+              updateDistance();
+              fetchWeather(p.lat, p.lng, 'ta');
+              reverseGeocode(p.lat, p.lng, 'ta');
+            }
+          });
+        } else {
+          taConnected = true;
+          updateTAStatus();
+        }
+      } catch(e) {}
+    }
+  };
+  x.send(JSON.stringify({name:myName, emoji:myEmoji, room:roomCode, lat:myLat, lng:myLng}));
+};
+
+// ===== 地图自适应 =====
+// 当页面尺寸变化时重新调整地图
+window.addEventListener('resize', () => {
+  if (map) {
+    setTimeout(() => map.invalidateSize(), 200);
+  }
+});
+
+</script>
+  
 
 </body>
 </html>
