@@ -11,7 +11,30 @@
   <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <link rel="stylesheet" href="style.css">
 
-  <script>document.addEventListener('click',function(e){var btn=e.target.closest('#join-btn');if(!btn)return;if(typeof window.joinRoom==='function'){window.joinRoom()}else{btn.textContent='加载中...';var b=btn;var c=setInterval(function(){if(typeof window.joinRoom==='function'){clearInterval(c);b.innerHTML='开始连接<span class=\"btn-icon\">✨</span>';window.joinRoom()}},300)}});</script>
+  <script>
+document.addEventListener('click', function(e) {
+  var t = e.target;
+  while (t && t !== document) {
+    if (t.id === 'join-btn') {
+      if (typeof window.joinRoom === 'function') {
+        window.joinRoom();
+      } else {
+        t.textContent = '加载中...';
+        var btn = t;
+        var ci = setInterval(function() {
+          if (typeof window.joinRoom === 'function') {
+            clearInterval(ci);
+            btn.textContent = '开始连接✨';
+            window.joinRoom();
+          }
+        }, 300);
+      }
+      return;
+    }
+    t = t.parentNode;
+  }
+});
+</script>
 </head>
 <body>
 
@@ -60,7 +83,7 @@
           <p class="input-hint">你和TA输入相同的暗号即可配对 💑</p>
         </div>
 
-        <button id="join-btn" class="btn-primary" onclick="var f=window.joinRoom;if(typeof f==='function'){f()}else{this.textContent='加载中...';var b=this;var c=setInterval(function(){if(typeof window.joinRoom==='function'){clearInterval(c);b.innerHTML='开始连接<span class=\\"btn-icon\\">✨</span>';window.joinRoom()}},300)}">
+        <button id="join-btn" class="btn-primary">✨</span>';window.joinRoom()}},300)}">
           开始连接
           <span class="btn-icon">✨</span>
         </button>
@@ -148,7 +171,7 @@
 })();
 </script>
 
-<script src="app.js"></script>
+<script src="app.js?v=1781425820348"></script>
   <script async src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 </body>
