@@ -102,43 +102,49 @@ async function initApp() {
 function connectWebSocket() {
   try {
     ws = new WebSocket(CONFIG.wsUrl);
-  } catch (e) {
-    setStatus('disconnected', '连接失败');
+  } catch(e) {
+    console.log('WebSocket创建失败，切到HTTP');
+    startHttpPoll();
     return;
   }
+  
+  wsTimer = setTimeout(function() {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.log('WebSocket连接超时，切到HTTP');
+      try { ws.close(); } catch(e) {}
+      ws = null;
+      startHttpPoll();
+    }
+  }, 5000);
 
-  ws.onopen = () => {
+  ws.onopen = function() {
+    clearTimeout(wsTimer);
     setStatus('connected', '已连接');
-    ws.send(JSON.stringify({
-      type: 'join',
-      room: roomCode,
-      name: myName,
-      emoji: myEmoji
-    }));
+    sendLocation();
+    ws.send(JSON.stringify({type:'join',room:roomCode,name:myName,emoji:myEmoji}));
   };
 
-  ws.onmessage = (event) => {
-    try {
-      const msg = JSON.parse(event.data);
-      handleMessage(msg);
-    } catch (e) {
-      console.error('消息解析失败:', e);
+  ws.onmessage = function(ev) {
+    try { handleMessage(JSON.parse(ev.data)); } catch(e) { console.error('消息解析失败:', e); }
+  };
+
+  ws.onclose = function() {
+    if (!httpPollOn) {
+      setStatus('disconnected', '连接断开，切到HTTP');
+      startHttpPoll();
     }
   };
 
-  ws.onclose = () => {
-    setStatus('disconnected', '连接断开，10秒后重连...');
-    taConnected = false;
-    updateTAStatus();
-    setTimeout(connectWebSocket, 10000);
-  };
-
   ws.onerror = function() {
-    setStatus('disconnected', '连接异常，10秒后重试...');
+    clearTimeout(wsTimer);
+    if (!httpPollOn) {
+      console.log('WebSocket错误，切到HTTP');
+      startHttpPoll();
+    }
   };
 }
 
-function handleMessage(msg) {
+function handleMessage(msg)function handleMessage(msg) {
   switch (msg.type) {
     case 'room-info':
       msg.peers.forEach(p => {
@@ -598,6 +604,56 @@ function updateStatusMsg(msg) {
     if (isConnected && txt) txt.textContent = '已连接';
   }, 3000);
 }
+
+
+// ===== HTTP 轮询（WebSocket 不可用时的备份）=====
+function startHttpPoll() {
+  if (httpPollOn) return;
+  httpPollOn = true;
+  setStatus('connected', '⚡ HTTP模式');
+  
+  httpSendLoc();
+  
+  httpPollTimer = setInterval(function() {
+    httpSendLoc();
+  }, 3000);
+}
+
+function httpSendLoc() {
+  if (!myName || !roomCode || myLat === null || myLng === null) return;
+  
+  var x = new XMLHttpRequest();
+  x.open('POST', '/api/location', true);
+  x.setRequestHeader('Content-Type', 'application/json');
+  x.onreadystatechange = function() {
+    if (x.readyState === 4 && x.status === 200) {
+      try {
+        var d = JSON.parse(x.responseText);
+        if (d.ok && d.peers && d.peers.length > 0) {
+          d.peers.forEach(function(p) {
+            taName = p.name;
+            taEmoji = p.emoji || '💜';
+            if (p.lat !== null) {
+              taLat = p.lat;
+              taLng = p.lng;
+              taConnected = true;
+              updateTACard();
+              updateTAStatus();
+              updateMap();
+              updateDistance();
+              fetchWeather(p.lat, p.lng, 'ta');
+              reverseGeocode(p.lat, p.lng, 'ta');
+            }
+          });
+        } else {
+          taConnected = true;
+          updateTAStatus();
+        }
+      } catch(e) {}
+    }
+  };
+  x.send(JSON.stringify({name:myName, emoji:myEmoji, room:roomCode, lat:myLat, lng:myLng}));
+};
 
 // ===== 地图自适应 =====
 // 当页面尺寸变化时重新调整地图
