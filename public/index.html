@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,140 +6,138 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
  <meta name="theme-color" content="#FF6B8A">
- <title>💕 我们的距离</title>
-  <!-- Leaflet 地图 -->
+ <title>馃挄 鎴戜滑鐨勮窛绂?/title>
+  <!-- Leaflet 鍦板浘 -->
   <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script defer src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script defer src="app.js"></script>
  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ========== 配对屏幕 ========== -->
+  <!-- ========== 閰嶅灞忓箷 ========== -->
   <div id="pairing-screen" class="screen">
     <div class="pairing-container">
       <div class="pairing-header">
-        <div class="pairing-icon">💕</div>
-        <h1>我们的距离</h1>
-        <p class="pairing-subtitle">和你的 TA 共享实时位置与天气</p>
+        <div class="pairing-icon">馃挄</div>
+        <h1>鎴戜滑鐨勮窛绂?/h1>
+        <p class="pairing-subtitle">鍜屼綘鐨?TA 鍏变韩瀹炴椂浣嶇疆涓庡ぉ姘?/p>
       </div>
 
       <div class="pairing-form">
         <div class="input-group">
-          <label>你的昵称</label>
+          <label>浣犵殑鏄电О</label>
           <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input type="text" id="nickname-input" placeholder="输入你的名字" maxlength="8">
+            <span class="input-icon">馃懁</span>
+            <input type="text" id="nickname-input" placeholder="杈撳叆浣犵殑鍚嶅瓧" maxlength="8">
           </div>
         </div>
 
         <div class="emoji-picker">
-          <label>选择一个头像</label>
+          <label>閫夋嫨涓€涓ご鍍?/label>
           <div class="emoji-grid" id="emoji-grid">
-            <span class="emoji-option active" data-emoji="💙">💙</span>
-            <span class="emoji-option" data-emoji="❤️">❤️</span>
-            <span class="emoji-option" data-emoji="💜">💜</span>
-            <span class="emoji-option" data-emoji="🧡">🧡</span>
-            <span class="emoji-option" data-emoji="💚">💚</span>
-            <span class="emoji-option" data-emoji="🩵">🩵</span>
-            <span class="emoji-option" data-emoji="🌸">🌸</span>
-            <span class="emoji-option" data-emoji="🐱">🐱</span>
-            <span class="emoji-option" data-emoji="🐶">🐶</span>
-            <span class="emoji-option" data-emoji="🦋">🦋</span>
-            <span class="emoji-option" data-emoji="🌟">🌟</span>
-            <span class="emoji-option" data-emoji="🌙">🌙</span>
+            <span class="emoji-option active" data-emoji="馃挋">馃挋</span>
+            <span class="emoji-option" data-emoji="鉂わ笍">鉂わ笍</span>
+            <span class="emoji-option" data-emoji="馃挏">馃挏</span>
+            <span class="emoji-option" data-emoji="馃А">馃А</span>
+            <span class="emoji-option" data-emoji="馃挌">馃挌</span>
+            <span class="emoji-option" data-emoji="馃┑">馃┑</span>
+            <span class="emoji-option" data-emoji="馃尭">馃尭</span>
+            <span class="emoji-option" data-emoji="馃惐">馃惐</span>
+            <span class="emoji-option" data-emoji="馃惗">馃惗</span>
+            <span class="emoji-option" data-emoji="馃">馃</span>
+            <span class="emoji-option" data-emoji="馃専">馃専</span>
+            <span class="emoji-option" data-emoji="馃寵">馃寵</span>
           </div>
         </div>
 
         <div class="input-group">
-          <label>配对码</label>
+          <label>閰嶅鐮?/label>
           <div class="input-wrapper">
-            <span class="input-icon">🔗</span>
-            <input type="text" id="room-input" placeholder="和TA约定一个暗号" maxlength="12">
+            <span class="input-icon">馃敆</span>
+            <input type="text" id="room-input" placeholder="鍜孴A绾﹀畾涓€涓殫鍙? maxlength="12">
           </div>
-          <p class="input-hint">你和TA输入相同的暗号即可配对 💑</p>
+          <p class="input-hint">浣犲拰TA杈撳叆鐩稿悓鐨勬殫鍙峰嵆鍙厤瀵?馃拺</p>
         </div>
 
         <button id="join-btn" class="btn-primary" onclick="joinRoom()">
-          开始连接
-          <span class="btn-icon">✨</span>
+          寮€濮嬭繛鎺?          <span class="btn-icon">鉁?/span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ========== 主屏幕 ========== -->
+  <!-- ========== 涓诲睆骞?========== -->
   <div id="main-screen" class="screen" style="display:none">
 
-    <!-- 状态栏 -->
+    <!-- 鐘舵€佹爮 -->
     <div class="status-bar">
       <div class="status-left">
         <span class="status-dot" id="status-dot"></span>
-        <span id="status-text">连接中...</span>
+        <span id="status-text">杩炴帴涓?..</span>
       </div>
       <div class="status-right">
         <span id="room-display"></span>
-        <button class="btn-icon-small" onclick="disconnect()" title="断开连接">
-          ✕
-        </button>
+        <button class="btn-icon-small" onclick="disconnect()" title="鏂紑杩炴帴">
+          鉁?        </button>
       </div>
     </div>
 
-    <!-- 用户卡片 -->
+    <!-- 鐢ㄦ埛鍗＄墖 -->
     <div class="user-cards">
-      <!-- 自己 -->
+      <!-- 鑷繁 -->
       <div class="user-card me">
-        <div class="card-avatar" id="my-avatar">💙</div>
+        <div class="card-avatar" id="my-avatar">馃挋</div>
         <div class="card-info">
-          <div class="card-name" id="my-name">我</div>
-          <div class="card-location" id="my-location">获取位置中...</div>
+          <div class="card-name" id="my-name">鎴?/div>
+          <div class="card-location" id="my-location">鑾峰彇浣嶇疆涓?..</div>
           <div class="card-weather" id="my-weather">
-            <span class="weather-loading">☁️ 加载天气...</span>
+            <span class="weather-loading">鈽侊笍 鍔犺浇澶╂皵...</span>
           </div>
         </div>
-        <div class="card-badge">我</div>
+        <div class="card-badge">鎴?/div>
       </div>
 
-      <!-- 距离爱心 -->
+      <!-- 璺濈鐖卞績 -->
       <div class="distance-heart" id="distance-heart">
-        <div class="heart-icon">❤️</div>
+        <div class="heart-icon">鉂わ笍</div>
         <div class="distance-value" id="distance-value">--</div>
         <div class="distance-unit">km</div>
       </div>
 
       <!-- TA -->
       <div class="user-card ta">
-        <div class="card-avatar" id="ta-avatar">💜</div>
+        <div class="card-avatar" id="ta-avatar">馃挏</div>
         <div class="card-info">
           <div class="card-name" id="ta-name">TA</div>
-          <div class="card-location" id="ta-location">等待TA连接...</div>
+          <div class="card-location" id="ta-location">绛夊緟TA杩炴帴...</div>
           <div class="card-weather" id="ta-weather">
-            <span class="weather-loading">☁️ 等待中...</span>
+            <span class="weather-loading">鈽侊笍 绛夊緟涓?..</span>
           </div>
         </div>
         <div class="card-badge">TA</div>
       </div>
     </div>
 
-    <!-- 地图容器 -->
+    <!-- 鍦板浘瀹瑰櫒 -->
     <div class="map-wrapper">
       <div id="map-container"></div>
     </div>
 
-    <!-- 底部操作栏 -->
+    <!-- 搴曢儴鎿嶄綔鏍?-->
     <div class="bottom-bar">
       <button class="btn-secondary" onclick="forceUpdateLocation()">
-        <span>📍</span> 刷新位置
+        <span>馃搷</span> 鍒锋柊浣嶇疆
       </button>
-      <div class="last-update" id="last-update">刚刚更新</div>
+      <div class="last-update" id="last-update">鍒氬垰鏇存柊</div>
     </div>
   </div>
 
-  <!-- 加载提示 -->
+  <!-- 鍔犺浇鎻愮ず -->
   <div id="loading-overlay" style="display:none">
     <div class="loading-spinner"></div>
-    <p>正在获取位置信息...</p>
+    <p>姝ｅ湪鑾峰彇浣嶇疆淇℃伅...</p>
   </div>
 
-  <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
- <script src="app.js"></script>
 </body>
 </html>
