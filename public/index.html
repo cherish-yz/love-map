@@ -642,27 +642,31 @@ html, body {
 </style>
 
   <script>
-document.addEventListener('click', function(e) {
-  var t = e.target;
-  while (t && t !== document) {
-    if (t.id === 'join-btn') {
-      if (typeof window.joinRoom === 'function') {
-        window.joinRoom();
-      } else {
-        t.textContent = '加载中...';
-        var btn = t;
-        var ci = setInterval(function() {
-          if (typeof window.joinRoom === 'function') {
-            clearInterval(ci);
-            btn.textContent = '开始连接✨';
-            window.joinRoom();
-          }
-        }, 300);
+<script>
+['click', 'touchend'].forEach(function(evType) {
+  document.addEventListener(evType, function(e) {
+    var t = e.target;
+    while (t && t !== document) {
+      if (t.id === 'join-btn') {
+        e.preventDefault();
+        if (typeof window.joinRoom === 'function') {
+          window.joinRoom();
+        } else {
+          t.textContent = '加载中...';
+          var btn = t;
+          var ci = setInterval(function() {
+            if (typeof window.joinRoom === 'function') {
+              clearInterval(ci);
+              btn.textContent = '开始连接✨';
+              window.joinRoom();
+            }
+          }, 300);
+        }
+        return;
       }
-      return;
+      t = t.parentNode;
     }
-    t = t.parentNode;
-  }
+  });
 });
 </script>
 <script>
