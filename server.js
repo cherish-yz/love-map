@@ -9,6 +9,39 @@ const wss = new WebSocket.Server({ server });
 
 // 静态文件服务
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+// ===== HTTP 轮询 API（WebSocket 不可用时的备份）=====
+var httpLoc = {};
+setInterval(function() {
+  var now = Date.now();
+  for (var room in httpLoc) {
+    httpLoc[room] = httpLoc[room].filter(function(u) { return now - u.t < 30000; });
+    if (httpLoc[room].length === 0) delete httpLoc[room];
+  }
+}, 10000);
+
+app.post('/api/location', function(req, res) {
+  var data = req.body;
+  if (!data || !data.room || !data.name) return res.json({ok: false});
+  if (!httpLoc[data.room]) httpLoc[data.room] = [];
+  var users = httpLoc[data.room];
+  var found = false;
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].name === data.name) { users[i] = {name: data.name, emoji: data.emoji || '', lat: data.lat, lng: data.lng, t: Date.now()}; found = true; break; }
+  }
+  if (!found) users.push({name: data.name, emoji: data.emoji || '', lat: data.lat, lng: data.lng, t: Date.now()});
+  var peers = users.filter(function(u) { return u.name !== data.name; }).map(function(u) { return {name: u.name, emoji: u.emoji, lat: u.lat, lng: u.lng}; });
+  res.json({ok: true, peers: peers});
+});
+
+app.get('/api/location', function(req, res) {
+  var room = req.query.room;
+  if (!room) return res.json({ok: false, peers: []});
+  var users = httpLoc[room] || [];
+  var peers = users.filter(function(u) { return u.name !== req.query.me; }).map(function(u) { return {name: u.name, emoji: u.emoji, lat: u.lat, lng: u.lng}; });
+  res.json({ok: true, peers: peers});
+});
+
 
 // 房间管理：roomCode -> Set<WebSocket>
 const rooms = new Map();
