@@ -133,7 +133,7 @@ function connectWebSocket() {
     setTimeout(connectWebSocket, 10000);
   };
 
-  ws.onerror = () => {
+  ws.onerror = function() {
     setStatus('disconnected', '连接异常，10秒后重试...');
   };
 }
@@ -195,7 +195,7 @@ function handleMessage(msg) {
       updateTAStatus();
       updateMap();
       updateDistance();
-      updateStatusMsg('💔 ' + msg.name + ' 已离开');
+      updateStatusMsg('💔 ' + msg.name + ' 已断开');
       break;
   }
 }
@@ -217,33 +217,45 @@ function sendLocation() {
 // 如果想切换为高德地图，配置 CONFIG.AMapKey 后
 // 将下方 L.map 替换为高德地图初始化代码即可
 
+try { var L_check = typeof L !== 'undefined' && L; } catch(e){ L_check = null; }
 async function initMap() {
   return new Promise((resolve) => {
     const container = document.getElementById('map-container');
 
-    // 创建 Leaflet 地图
-    map = L.map(container, {
-      center: [35.0, 104.0],
-      zoom: 5,
-      zoomControl: false,
-      attributionControl: false,
-    });
+    try {
+      if (typeof L === 'undefined') {
+        container.innerHTML = '<div style="padding:30px;text-align:center;color:#999;font-size:14px">地图加载中...</div>';
+        setTimeout(resolve, 1000);
+        return;
+      }
 
-    // OpenStreetMap 图层
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      className: 'map-tiles',
-    }).addTo(map);
+      map = L.map(container, {
+        center: [35.0, 104.0],
+        zoom: 5,
+        zoomControl: false,
+        attributionControl: false,
+      });
 
-    // 中文地图风格 - 改用 OpenStreetMap 的中文友好样式
-    L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-    }).addTo(map);
+      // 使用 ArcGIS 地图（在中国可正常访问）
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Esri'
+      }).addTo(map);
 
-    setTimeout(() => {
-      map.invalidateSize();
-      resolve();
-    }, 100);
+      // 备选：OpenStreetMap 中文风格
+      L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+      }).addTo(map);
+
+      setTimeout(function() {
+        try { map.invalidateSize(); } catch(e) {}
+        resolve();
+      }, 300);
+    } catch(e) {
+      console.error('地图初始化失败:', e);
+      container.innerHTML = '<div style="padding:30px;text-align:center;color:#999;font-size:14px">地图加载失败，其他功能正常</div>';
+      setTimeout(resolve, 500);
+    }
   });
 }
 
