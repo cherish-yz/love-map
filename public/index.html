@@ -58,7 +58,7 @@
           <p class="input-hint">你和TA输入相同的暗号即可配对 💑</p>
         </div>
 
-        <button id="join-btn" class="btn-primary" onclick="joinRoom()">
+        <button id="join-btn" class="btn-primary" >
           开始连接
           <span class="btn-icon">✨</span>
         </button>
@@ -123,24 +123,28 @@
   </div>
 
   
-  <!-- 按钮防呆：即使 app.js 还没加载也能响应 -->
-  <script>
-  document.getElementById('join-btn').addEventListener('click', function(e) {
+  <!-- 按钮防呆：接管点击事件，等待 app.js 加载 -->
+<script>
+(function(){
+  var btn = document.getElementById('join-btn');
+  if (!btn) return;
+  btn.onclick = function() {
     if (typeof joinRoom === 'function') {
       joinRoom();
     } else {
-      var btn = this;
-      btn.textContent = '加载中...';
+      this.textContent = '加载中...';
+      var me = this;
       var checkLoaded = setInterval(function() {
         if (typeof joinRoom === 'function') {
           clearInterval(checkLoaded);
-          btn.innerHTML = '开始连接<span class="btn-icon">✨</span>';
+          me.innerHTML = '开始连接<span class="btn-icon">✨</span>';
           joinRoom();
         }
-      }, 200);
+      }, 300);
     }
-  });
-  </script>
+  };
+})();
+</script>
 
 <script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="app.js"></script>
