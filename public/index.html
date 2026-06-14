@@ -665,140 +665,8 @@ document.addEventListener('click', function(e) {
   }
 });
 </script>
-</head>
-<body>
-
-  <!-- ========== 配对屏幕 ========== -->
-  <div id="pairing-screen" class="screen">
-    <div class="pairing-container">
-      <div class="pairing-header">
-        <div class="pairing-icon">💕</div>
-        <h1>我们的距离</h1>
-        <p class="pairing-subtitle">和你的 TA 共享实时位置与天气</p>
-      </div>
-
-      <div class="pairing-form">
-        <div class="input-group">
-          <label>你的昵称</label>
-          <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input type="text" id="nickname-input" placeholder="输入你的名字" maxlength="8">
-          </div>
-        </div>
-
-        <div class="emoji-picker">
-          <label>选择一个头像</label>
-          <div class="emoji-grid" id="emoji-grid">
-            <span class="emoji-option active" data-emoji="💙">💙</span>
-            <span class="emoji-option" data-emoji="❤️">❤️</span>
-            <span class="emoji-option" data-emoji="💜">💜</span>
-            <span class="emoji-option" data-emoji="🧡">🧡</span>
-            <span class="emoji-option" data-emoji="💚">💚</span>
-            <span class="emoji-option" data-emoji="🩵">🩵</span>
-            <span class="emoji-option" data-emoji="🌸">🌸</span>
-            <span class="emoji-option" data-emoji="🐱">🐱</span>
-            <span class="emoji-option" data-emoji="🐶">🐶</span>
-            <span class="emoji-option" data-emoji="🦋">🦋</span>
-            <span class="emoji-option" data-emoji="🌟">🌟</span>
-            <span class="emoji-option" data-emoji="🌙">🌙</span>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <label>配对码</label>
-          <div class="input-wrapper">
-            <span class="input-icon">🔗</span>
-            <input type="text" id="room-input" placeholder="和TA约定一个暗号" maxlength="12">
-          </div>
-          <p class="input-hint">你和TA输入相同的暗号即可配对 💑</p>
-        </div>
-
-        <button id="join-btn" class="btn-primary">开始连接<span class="btn-icon">✨</span></button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========== 主屏幕 ========== -->
-  <div id="main-screen" class="screen" style="display:none">
-    <div class="status-bar">
-      <div class="status-left">
-        <span class="status-dot" id="status-dot"></span>
-        <span id="status-text">连接中...</span>
-      </div>
-      <div class="status-right">
-        <span id="room-display"></span>
-        <button class="btn-icon-small" onclick="disconnect()" title="断开连接">✕</button>
-      </div>
-    </div>
-
-    <div class="user-cards">
-      <div class="user-card me">
-        <div class="card-avatar" id="my-avatar">💙</div>
-        <div class="card-info">
-          <div class="card-name" id="my-name">我</div>
-          <div class="card-location" id="my-location">获取位置中...</div>
-          <div class="card-weather" id="my-weather"><span class="weather-loading">☁️ 加载天气...</span></div>
-        </div>
-        <div class="card-badge">我</div>
-      </div>
-
-      <div class="distance-heart" id="distance-heart">
-        <div class="heart-icon">❤️</div>
-        <div class="distance-value" id="distance-value">--</div>
-        <div class="distance-unit">km</div>
-      </div>
-
-      <div class="user-card ta">
-        <div class="card-avatar" id="ta-avatar">💜</div>
-        <div class="card-info">
-          <div class="card-name" id="ta-name">TA</div>
-          <div class="card-location" id="ta-location">等待TA连接...</div>
-          <div class="card-weather" id="ta-weather"><span class="weather-loading">☁️ 等待中...</span></div>
-        </div>
-        <div class="card-badge">TA</div>
-      </div>
-    </div>
-
-    <div class="map-wrapper">
-      <div id="map-container"></div>
-    </div>
-
-    <div class="bottom-bar">
-      <button class="btn-secondary" onclick="forceUpdateLocation()"><span>📍</span> 刷新位置</button>
-      <div class="last-update" id="last-update">刚刚更新</div>
-    </div>
-  </div>
-
-  <div id="loading-overlay" style="display:none">
-    <div class="loading-spinner"></div>
-    <p>正在获取位置信息...</p>
-  </div>
-
-  
-  <!-- 按钮防呆：接管点击事件，等待 app.js 加载 -->
 <script>
-(function(){
-  var btn = document.getElementById('join-btn');
-  if (!btn) return;
-  btn.onclick = function() {
-    if (typeof joinRoom === 'function') {
-      joinRoom();
-    } else {
-      this.textContent = '加载中...';
-      var me = this;
-      var checkLoaded = setInterval(function() {
-        if (typeof joinRoom === 'function') {
-          clearInterval(checkLoaded);
-          me.innerHTML = '开始连接<span class="btn-icon">✨</span>';
-          joinRoom();
-        }
-      }, 300);
-    }
-  };
-})();
-</script>
 
-<script>
 // 默认使用 Leaflet + OpenStreetMap，无需任何 Key，开箱即用
 const CONFIG = {
   AMapKey: '', // 留空用 Leaflet，填 Key 后自动切换高德地图
@@ -1464,8 +1332,140 @@ window.addEventListener('resize', () => {
   }
 });
 
+
 </script>
+</head>
+<body>
+
+  <!-- ========== 配对屏幕 ========== -->
+  <div id="pairing-screen" class="screen">
+    <div class="pairing-container">
+      <div class="pairing-header">
+        <div class="pairing-icon">💕</div>
+        <h1>我们的距离</h1>
+        <p class="pairing-subtitle">和你的 TA 共享实时位置与天气</p>
+      </div>
+
+      <div class="pairing-form">
+        <div class="input-group">
+          <label>你的昵称</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input type="text" id="nickname-input" placeholder="输入你的名字" maxlength="8">
+          </div>
+        </div>
+
+        <div class="emoji-picker">
+          <label>选择一个头像</label>
+          <div class="emoji-grid" id="emoji-grid">
+            <span class="emoji-option active" data-emoji="💙">💙</span>
+            <span class="emoji-option" data-emoji="❤️">❤️</span>
+            <span class="emoji-option" data-emoji="💜">💜</span>
+            <span class="emoji-option" data-emoji="🧡">🧡</span>
+            <span class="emoji-option" data-emoji="💚">💚</span>
+            <span class="emoji-option" data-emoji="🩵">🩵</span>
+            <span class="emoji-option" data-emoji="🌸">🌸</span>
+            <span class="emoji-option" data-emoji="🐱">🐱</span>
+            <span class="emoji-option" data-emoji="🐶">🐶</span>
+            <span class="emoji-option" data-emoji="🦋">🦋</span>
+            <span class="emoji-option" data-emoji="🌟">🌟</span>
+            <span class="emoji-option" data-emoji="🌙">🌙</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>配对码</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔗</span>
+            <input type="text" id="room-input" placeholder="和TA约定一个暗号" maxlength="12">
+          </div>
+          <p class="input-hint">你和TA输入相同的暗号即可配对 💑</p>
+        </div>
+
+        <button id="join-btn" class="btn-primary">开始连接<span class="btn-icon">✨</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 主屏幕 ========== -->
+  <div id="main-screen" class="screen" style="display:none">
+    <div class="status-bar">
+      <div class="status-left">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">连接中...</span>
+      </div>
+      <div class="status-right">
+        <span id="room-display"></span>
+        <button class="btn-icon-small" onclick="disconnect()" title="断开连接">✕</button>
+      </div>
+    </div>
+
+    <div class="user-cards">
+      <div class="user-card me">
+        <div class="card-avatar" id="my-avatar">💙</div>
+        <div class="card-info">
+          <div class="card-name" id="my-name">我</div>
+          <div class="card-location" id="my-location">获取位置中...</div>
+          <div class="card-weather" id="my-weather"><span class="weather-loading">☁️ 加载天气...</span></div>
+        </div>
+        <div class="card-badge">我</div>
+      </div>
+
+      <div class="distance-heart" id="distance-heart">
+        <div class="heart-icon">❤️</div>
+        <div class="distance-value" id="distance-value">--</div>
+        <div class="distance-unit">km</div>
+      </div>
+
+      <div class="user-card ta">
+        <div class="card-avatar" id="ta-avatar">💜</div>
+        <div class="card-info">
+          <div class="card-name" id="ta-name">TA</div>
+          <div class="card-location" id="ta-location">等待TA连接...</div>
+          <div class="card-weather" id="ta-weather"><span class="weather-loading">☁️ 等待中...</span></div>
+        </div>
+        <div class="card-badge">TA</div>
+      </div>
+    </div>
+
+    <div class="map-wrapper">
+      <div id="map-container"></div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-secondary" onclick="forceUpdateLocation()"><span>📍</span> 刷新位置</button>
+      <div class="last-update" id="last-update">刚刚更新</div>
+    </div>
+  </div>
+
+  <div id="loading-overlay" style="display:none">
+    <div class="loading-spinner"></div>
+    <p>正在获取位置信息...</p>
+  </div>
+
   
+  <!-- 按钮防呆：接管点击事件，等待 app.js 加载 -->
+<script>
+(function(){
+  var btn = document.getElementById('join-btn');
+  if (!btn) return;
+  btn.onclick = function() {
+    if (typeof joinRoom === 'function') {
+      joinRoom();
+    } else {
+      this.textContent = '加载中...';
+      var me = this;
+      var checkLoaded = setInterval(function() {
+        if (typeof joinRoom === 'function') {
+          clearInterval(checkLoaded);
+          me.innerHTML = '开始连接<span class="btn-icon">✨</span>';
+          joinRoom();
+        }
+      }, 300);
+    }
+  };
+})();
+</script>
 
 </body>
 </html>
