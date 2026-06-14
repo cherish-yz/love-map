@@ -10,6 +10,8 @@
   <!-- Leaflet 地图（开箱即用，无需 API Key） -->
   <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <link rel="stylesheet" href="style.css">
+
+  <script>document.addEventListener('click',function(e){var btn=e.target.closest('#join-btn');if(!btn)return;if(typeof window.joinRoom==='function'){window.joinRoom()}else{btn.textContent='加载中...';var b=btn;var c=setInterval(function(){if(typeof window.joinRoom==='function'){clearInterval(c);b.innerHTML='开始连接<span class=\"btn-icon\">✨</span>';window.joinRoom()}},300)}});</script>
 </head>
 <body>
 
@@ -58,7 +60,7 @@
           <p class="input-hint">你和TA输入相同的暗号即可配对 💑</p>
         </div>
 
-        <button id="join-btn" class="btn-primary" >
+        <button id="join-btn" class="btn-primary" onclick="var f=window.joinRoom;if(typeof f==='function'){f()}else{this.textContent='加载中...';var b=this;var c=setInterval(function(){if(typeof window.joinRoom==='function'){clearInterval(c);b.innerHTML='开始连接<span class=\\"btn-icon\\">✨</span>';window.joinRoom()}},300)}">
           开始连接
           <span class="btn-icon">✨</span>
         </button>
